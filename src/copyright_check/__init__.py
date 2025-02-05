@@ -36,7 +36,7 @@ def main():
 
     # Log some information
     logging.basicConfig(level=args.loglevel, format="[%(levelname)-5s] %(message)s")
-    logger.info("Starting Kura projects metadata generator...")
+    logger.info("Starting Kura projects copyright checker...")
     logger.debug("Arguments: {}".format(args))
     logger.info("Current working directory: {}".format(os.getcwd()))
 
@@ -60,22 +60,27 @@ def main():
     regex = re.escape(template)
     regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
     regex = regex.replace(r"\{holder\}", r"[\w\s]+")
-    logger.debug("Template: \n{}".format(regex))
 
     for filename in args.filenames:
         logger.debug("Checking file: {}".format(filename))
         comments = comment_parser.extract_comments(filename)
         if comments is None or len(comments) == 0:
-            logger.error("No comment found for {}.".format(filename))
+            logger.error("{} - Header missing".format(filename))
             continue
         header_comment = comments[0] # First comment is the header
-        logger.debug("Header: \n{}".format(header_comment.text()))
 
         # Check copyright
-        if re.search(re.compile(regex), header_comment.text()):
-            logger.info("Header is correct")
-        else:
-            logger.error("Header is incorrect")
+        if not re.search(re.compile(regex), header_comment.text()):
+            logger.error("{} - Header incorrect or missing".format(filename))
+            continue
+
+        # Check year
+        year = datetime.datetime.now().year
+        if not str(year) in header_comment.text():
+            logger.error("{} - Copyright year incorrect or missing".format(filename))
+            continue
+
+        logger.info("{} - OK".format(filename))
 
 if __name__ == '__main__':
     main()

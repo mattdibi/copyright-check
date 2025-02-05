@@ -1,6 +1,24 @@
 # copyright-check
 Copyright checker
 
+## Usage
+
+```bash
+usage: copyright-check [-h] [-d] -c CONFIG file [file ...]
+
+Check copyright headers
+
+positional arguments:
+  file                 file(s) to check
+
+options:
+  -h, --help           show this help message and exit
+  -d, --debug          Print debug information
+  -c, --config CONFIG  set path to the config yaml file
+
+Example usage: copyright-check -c config.yaml $(git diff --name-only) **/*.java
+```
+
 ## Example configuration
 
 ```yaml

@@ -103,6 +103,7 @@ def main():
             logger.error("Error parsing config file: {}".format(exc))
             exit(1)
 
+    # TODO: not the best way to load the templates
     SUPPORTED_LANGUAGES['text/x-java'] = config['template_java']
     SUPPORTED_LANGUAGES['text/xml'] = config['template_xml']
 

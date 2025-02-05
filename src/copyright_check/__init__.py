@@ -4,12 +4,47 @@ import logging
 import os
 import re
 import textwrap
+import magic
 
 from difflib import ndiff
 
 from comment_parser import comment_parser
 
 logger = logging.getLogger(__name__)
+
+
+TEMPLATE_JAVA = textwrap.dedent('''\
+******************************************************************************
+ * Copyright (c) {years} {holder} and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  {holder}
+''')
+
+TEMPLATE_XML = '''\
+    Copyright (c) {years} {holder} and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     {holder}
+'''
+
+SUPPORTED_LANGUAGES = {
+    'text/x-java': TEMPLATE_JAVA,
+    'text/xml': TEMPLATE_XML,
+    'text/x-c': None
+}
 
 def main():
     # Parse command line arguments
@@ -54,30 +89,30 @@ def main():
     # TODO
 
     # Check files
-    template = textwrap.dedent('''\
-******************************************************************************
- * Copyright (c) {years} {holder} and/or its affiliates and others
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
- *
- * Contributors:
-''')
-
     year = datetime.datetime.now().year
-
-    regex = re.escape(template)
-    regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
-    regex = regex.replace(r"\{holder\}", r"[\w\s\.]+")
 
     incorrect_files = []
 
     for filename in args.filenames:
+        if not os.path.isfile(filename):
+            logger.error("File not found: {}".format(filename))
+            continue
+
+        # Check file extension
+        mime_type = magic.Magic(mime=True).from_file(filename)
+        if mime_type not in SUPPORTED_LANGUAGES or not SUPPORTED_LANGUAGES[mime_type]:
+            logger.debug("Unsupported file type({}): {}".format(mime_type, filename))
+            continue
+
+        # Get template
+        template = SUPPORTED_LANGUAGES[mime_type]
+        regex = re.escape(template)
+        regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
+        regex = regex.replace(r"\{holder\}", r"[\w\s\.]+")
+
+        # Check header
         logger.debug("Checking file: {}".format(filename))
-        comments = comment_parser.extract_comments(filename, mime="text/x-java-source")
+        comments = comment_parser.extract_comments(filename, mime=mime_type)
         if comments is None or len(comments) == 0:
             logger.error("{} - FAIL (reason: header missing)".format(filename))
             incorrect_files.append(filename)

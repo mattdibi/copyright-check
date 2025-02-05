@@ -61,26 +61,35 @@ def main():
     regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
     regex = regex.replace(r"\{holder\}", r"[\w\s]+")
 
+    incorrect_files = []
+
     for filename in args.filenames:
         logger.debug("Checking file: {}".format(filename))
         comments = comment_parser.extract_comments(filename)
         if comments is None or len(comments) == 0:
-            logger.error("{} - Header missing".format(filename))
+            logger.error("{} - FAIL (reason: header missing)".format(filename))
+            incorrect_files.append(filename)
             continue
         header_comment = comments[0] # First comment is the header
 
         # Check copyright
         if not re.search(re.compile(regex), header_comment.text()):
-            logger.error("{} - Header incorrect or missing".format(filename))
+            logger.error("{} - FAIL (reason: header incorrect or missing)".format(filename))
+            incorrect_files.append(filename)
             continue
 
         # Check year
         year = datetime.datetime.now().year
         if not str(year) in header_comment.text():
-            logger.error("{} - Copyright year incorrect or missing".format(filename))
+            logger.error("{} - FAIL (reason: copyright year incorrect or missing)".format(filename))
+            incorrect_files.append(filename)
             continue
 
         logger.info("{} - OK".format(filename))
+
+    if incorrect_files:
+        logger.error("Incorrect files: {}".format(incorrect_files))
+        exit(1)
 
 if __name__ == '__main__':
     main()

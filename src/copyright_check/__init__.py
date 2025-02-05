@@ -27,6 +27,12 @@ def main():
             default='check_copyright_config.yaml')
 
     parser.add_argument(
+            '--bypass_year',
+            help='bypass check on the years in the header',
+            action="store_true",
+            default=False, required=False)
+
+    parser.add_argument(
             'filenames',
             nargs='+',
             help='file(s) to check',
@@ -57,6 +63,8 @@ def main():
  * Contributors:
 ''')
 
+    year = datetime.datetime.now().year
+
     regex = re.escape(template)
     regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
     regex = regex.replace(r"\{holder\}", r"[\w\s]+")
@@ -65,7 +73,7 @@ def main():
 
     for filename in args.filenames:
         logger.debug("Checking file: {}".format(filename))
-        comments = comment_parser.extract_comments(filename)
+        comments = comment_parser.extract_comments(filename, mime="text/x-java-source")
         if comments is None or len(comments) == 0:
             logger.error("{} - FAIL (reason: header missing)".format(filename))
             incorrect_files.append(filename)
@@ -79,8 +87,7 @@ def main():
             continue
 
         # Check year
-        year = datetime.datetime.now().year
-        if not str(year) in header_comment.text():
+        if not args.bypass_year and not str(year) in header_comment.text():
             logger.error("{} - FAIL (reason: copyright year incorrect or missing)".format(filename))
             incorrect_files.append(filename)
             continue

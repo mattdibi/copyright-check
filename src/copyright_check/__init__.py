@@ -74,7 +74,7 @@ def main():
     parser.add_argument(
             '-c', '--config',
             help='set path to the config yaml file',
-            default='check_copyright_config.yaml')
+            default='check_copyright_config.yaml', required=True)
 
     parser.add_argument(
             'filenames',

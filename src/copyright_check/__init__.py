@@ -89,7 +89,9 @@ def main():
             logger.error("{} - FAIL (reason: header incorrect or missing)".format(filename))
 
             # Print diff for debugging
-            diff = ndiff(template.splitlines(), header_comment.text().splitlines())
+            template_lines = template.splitlines()
+            diff_header_comment_lines = header_comment.text().splitlines()[:len(template_lines)]
+            diff = ndiff(template.splitlines(), diff_header_comment_lines)
             logger.debug("Issues for \"{}\":\n{}".format(filename, "\n".join(diff)))
 
             incorrect_files.append(filename)

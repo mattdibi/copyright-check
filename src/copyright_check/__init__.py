@@ -1,3 +1,4 @@
+
 import argparse
 import datetime
 import logging
@@ -5,6 +6,8 @@ import os
 import re
 import textwrap
 import magic
+
+from enum import Enum
 
 from difflib import ndiff
 
@@ -45,6 +48,45 @@ SUPPORTED_LANGUAGES = {
     'text/xml': TEMPLATE_XML,
     'text/x-c': None
 }
+
+class Error(Enum):
+    HEADER_MISSING = 1
+    HEADER_INCORRECT = 2
+    YEAR_INCORRECT = 3
+
+ERROR_MESSAGES = {
+    Error.HEADER_MISSING: "header missing",
+    Error.HEADER_INCORRECT: "header incorrect or missing",
+    Error.YEAR_INCORRECT: "year incorrect or missing"
+}
+
+
+def check_header(filename, template, regex, mime_type, bypass_year=False):
+    logger.debug("Checking file: {}".format(filename))
+
+    comments = comment_parser.extract_comments(filename, mime=mime_type)
+    if comments is None or len(comments) == 0:
+        return Error.HEADER_MISSING
+    header_comment = comments[0] # First comment is the header
+
+    # Check copyright
+    if not re.search(re.compile(regex), header_comment.text()):
+        # Print diff for debugging
+        template_lines = template.splitlines()
+        diff_header_comment_lines = header_comment.text().splitlines()[:len(template_lines)]
+        diff = ndiff(template.splitlines(), diff_header_comment_lines)
+        logger.debug("Issues for \"{}\":\n{}".format(filename, "\n".join(diff)))
+
+        return Error.HEADER_INCORRECT
+
+    # Check year
+    year = datetime.datetime.now().year
+    if not bypass_year and not str(year) in header_comment.text():
+        logger.error("{} - FAIL (reason: copyright year incorrect or missing)".format(filename))
+        return Error.YEAR_INCORRECT
+
+    return None
+
 
 def main():
     # Parse command line arguments
@@ -89,8 +131,6 @@ def main():
     # TODO
 
     # Check files
-    year = datetime.datetime.now().year
-
     incorrect_files = []
 
     for filename in args.filenames:
@@ -110,32 +150,9 @@ def main():
         regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
         regex = regex.replace(r"\{holder\}", r"[\w\s\.]+")
 
-        # Check header
-        logger.debug("Checking file: {}".format(filename))
-        comments = comment_parser.extract_comments(filename, mime=mime_type)
-        if comments is None or len(comments) == 0:
-            logger.error("{} - FAIL (reason: header missing)".format(filename))
-            incorrect_files.append(filename)
-            continue
-        header_comment = comments[0] # First comment is the header
-
-        # Check copyright
-        if not re.search(re.compile(regex), header_comment.text()):
-            logger.error("{} - FAIL (reason: header incorrect or missing)".format(filename))
-
-            # Print diff for debugging
-            template_lines = template.splitlines()
-            diff_header_comment_lines = header_comment.text().splitlines()[:len(template_lines)]
-            diff = ndiff(template.splitlines(), diff_header_comment_lines)
-            logger.debug("Issues for \"{}\":\n{}".format(filename, "\n".join(diff)))
-
-            incorrect_files.append(filename)
-            continue
-
-        # Check year
-        if not args.bypass_year and not str(year) in header_comment.text():
-            logger.error("{} - FAIL (reason: copyright year incorrect or missing)".format(filename))
-            incorrect_files.append(filename)
+        error = check_header(filename, template, regex, mime_type, args.bypass_year)
+        if error:
+            logger.error("{} - FAIL (reason: {})".format(filename, ERROR_MESSAGES[error]))
             continue
 
         logger.info("{} - OK".format(filename))

@@ -71,7 +71,7 @@ def main():
 
     regex = re.escape(template)
     regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
-    regex = regex.replace(r"\{holder\}", r"[\w\s]+")
+    regex = regex.replace(r"\{holder\}", r"[\w\s\.]+")
 
     incorrect_files = []
 

@@ -5,6 +5,8 @@ import os
 import re
 import textwrap
 
+from difflib import ndiff
+
 from comment_parser import comment_parser
 
 logger = logging.getLogger(__name__)
@@ -85,6 +87,11 @@ def main():
         # Check copyright
         if not re.search(re.compile(regex), header_comment.text()):
             logger.error("{} - FAIL (reason: header incorrect or missing)".format(filename))
+
+            # Print diff for debugging
+            diff = ndiff(template.splitlines(), header_comment.text().splitlines())
+            logger.debug("Issues for \"{}\":\n{}".format(filename, "\n".join(diff)))
+
             incorrect_files.append(filename)
             continue
 

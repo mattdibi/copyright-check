@@ -15,6 +15,7 @@ def main():
             prog="copyright-check",
             description='Check copyright headers',
             epilog="Example usage: copyright-check -c config.yaml $(git diff --name-only) **/*.java")
+
     parser.add_argument(
             '-d', '--debug',
             help="Print debug information",
@@ -26,6 +27,7 @@ def main():
             help='set path to the config yaml file',
             default='check_copyright_config.yaml')
 
+    # TODO: Move this in the configuration file not in CLI
     parser.add_argument(
             '--bypass_year',
             help='bypass check on the years in the header',

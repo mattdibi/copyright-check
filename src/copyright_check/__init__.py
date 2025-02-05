@@ -1,6 +1,11 @@
 import argparse
+import datetime
 import logging
 import os
+import re
+import textwrap
+
+from comment_parser import comment_parser
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +40,42 @@ def main():
     logger.debug("Arguments: {}".format(args))
     logger.info("Current working directory: {}".format(os.getcwd()))
 
+    # Parse config
+    # TODO
+
+    # Check files
+    template = textwrap.dedent('''\
+******************************************************************************
+ * Copyright (c) {years} {holder} and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+''')
+
+    regex = re.escape(template)
+    regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
+    regex = regex.replace(r"\{holder\}", r"[\w\s]+")
+    logger.debug("Template: \n{}".format(regex))
+
+    for filename in args.filenames:
+        logger.debug("Checking file: {}".format(filename))
+        comments = comment_parser.extract_comments(filename)
+        if comments is None or len(comments) == 0:
+            logger.error("No comment found for {}.".format(filename))
+            continue
+        header_comment = comments[0] # First comment is the header
+        logger.debug("Header: \n{}".format(header_comment.text()))
+
+        # Check copyright
+        if re.search(re.compile(regex), header_comment.text()):
+            logger.info("Header is correct")
+        else:
+            logger.error("Header is incorrect")
 
 if __name__ == '__main__':
     main()

@@ -2,6 +2,30 @@ version = 1
 requires-python = ">=3.13"
 
 [[package]]
+name = "comment-parser"
+version = "1.2.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "python-magic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/37/6a/354d8e640b5f90996ac07c002189a552226a0ddaad85efd14863166aaa14/comment_parser-1.2.5.tar.gz", hash = "sha256:5606b769228cafce03d538e361472896581b386f3bc44bd62f4b61ff45ff05ec", size = 8852 }
+
+[[package]]
 name = "copyright-check"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "comment-parser" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "comment-parser", specifier = ">=1.2.5" }]
+
+[[package]]
+name = "python-magic"
+version = "0.4.27"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/da/db/0b3e28ac047452d079d375ec6798bf76a036a08182dbb39ed38116a49130/python-magic-0.4.27.tar.gz", hash = "sha256:c1ba14b08e4a5f5c31a302b7721239695b2f0f058d125bd5ce1ee36b9d9d3c3b", size = 14677 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6c/73/9f872cb81fc5c3bb48f7227872c28975f998f3e7c2b1c16e95e6432bbb90/python_magic-0.4.27-py2.py3-none-any.whl", hash = "sha256:c212960ad306f700aa0d01e5d7a325d20548ff97eb9920dcd29513174f0294d3", size = 13840 },
+]

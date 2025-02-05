@@ -7,7 +7,9 @@ authors = [
     { name = "Mattia Dal Ben", email = "matthewdibi@gmail.com" }
 ]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "comment-parser>=1.2.5",
+]
 
 [project.scripts]
 copyright-check = "copyright_check:main"

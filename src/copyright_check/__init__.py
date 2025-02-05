@@ -1,10 +1,9 @@
-
+import yaml
 import argparse
 import datetime
 import logging
 import os
 import re
-import textwrap
 import magic
 
 from enum import Enum
@@ -15,36 +14,9 @@ from comment_parser import comment_parser
 
 logger = logging.getLogger(__name__)
 
-TEMPLATE_JAVA = textwrap.dedent('''\
-******************************************************************************
- * Copyright (c) {years} {holder} and/or its affiliates and others
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
- *
- * Contributors:
- *  {holder}
-''')
-
-TEMPLATE_XML = '''\
-    Copyright (c) {years} {holder} and/or its affiliates and others
-
-    This program and the accompanying materials are made
-    available under the terms of the Eclipse Public License 2.0
-    which is available at https://www.eclipse.org/legal/epl-2.0/
-
-    SPDX-License-Identifier: EPL-2.0
-
-    Contributors:
-     {holder}
-'''
-
 SUPPORTED_LANGUAGES = {
-    'text/x-java': TEMPLATE_JAVA,
-    'text/xml': TEMPLATE_XML,
+    'text/x-java': None,
+    'text/xml': None,
     'text/x-c': None
 }
 
@@ -104,13 +76,6 @@ def main():
             help='set path to the config yaml file',
             default='check_copyright_config.yaml')
 
-    # TODO: Move this in the configuration file not in CLI
-    parser.add_argument(
-            '--bypass_year',
-            help='bypass check on the years in the header',
-            action="store_true",
-            default=False, required=False)
-
     parser.add_argument(
             'filenames',
             nargs='+',
@@ -126,7 +91,20 @@ def main():
     logger.info("Current working directory: {}".format(os.getcwd()))
 
     # Parse config
-    # TODO
+    if not os.path.isfile(args.config):
+        logger.error("Config file not found: {}".format(args.config))
+        exit(1)
+
+    config = None
+    with open(args.config, 'r') as stream:
+        try:
+            config = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            logger.error("Error parsing config file: {}".format(exc))
+            exit(1)
+
+    SUPPORTED_LANGUAGES['text/x-java'] = config['template_java']
+    SUPPORTED_LANGUAGES['text/xml'] = config['template_xml']
 
     # Check files
     incorrect_files = []
@@ -148,9 +126,10 @@ def main():
         regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
         regex = regex.replace(r"\{holder\}", r"[\w\s\.]+")
 
-        error = check_header(filename, template, regex, mime_type, args.bypass_year)
+        error = check_header(filename, template, regex, mime_type, config["bypass_year_check"])
         if error:
             logger.error("{} - FAIL (reason: {})".format(filename, ERROR_MESSAGES[error]))
+            incorrect_files.append(filename)
             continue
 
         logger.info("{} - OK".format(filename))

@@ -15,7 +15,6 @@ from comment_parser import comment_parser
 
 logger = logging.getLogger(__name__)
 
-
 TEMPLATE_JAVA = textwrap.dedent('''\
 ******************************************************************************
  * Copyright (c) {years} {holder} and/or its affiliates and others
@@ -82,7 +81,6 @@ def check_header(filename, template, regex, mime_type, bypass_year=False):
     # Check year
     year = datetime.datetime.now().year
     if not bypass_year and not str(year) in header_comment.text():
-        logger.error("{} - FAIL (reason: copyright year incorrect or missing)".format(filename))
         return Error.YEAR_INCORRECT
 
     return None

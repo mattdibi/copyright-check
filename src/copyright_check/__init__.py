@@ -9,7 +9,7 @@ def main():
     parser = argparse.ArgumentParser(
             prog="copyright-check",
             description='Check copyright headers',
-            epilog="Example usage: copyright-check -c config.yaml $(git diff --name-only)")
+            epilog="Example usage: copyright-check -c config.yaml $(git diff --name-only) **/*.java")
     parser.add_argument(
             '-d', '--debug',
             help="Print debug information",

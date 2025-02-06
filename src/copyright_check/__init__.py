@@ -15,6 +15,12 @@ from comment_parser import comment_parser
 logger = logging.getLogger(__name__)
 
 SUPPORTED_LANGUAGES = {
+    'java': 'text/x-java',
+    'xml': 'text/xml',
+    'c': 'text/x-c'
+}
+
+LOADED_TEMPLATES = {
     'text/x-java': None,
     'text/xml': None,
     'text/x-c': None
@@ -103,9 +109,15 @@ def main():
             logger.error("Error parsing config file: {}".format(exc))
             exit(1)
 
-    # TODO: not the best way to load the templates
-    SUPPORTED_LANGUAGES['text/x-java'] = config['template_java']
-    SUPPORTED_LANGUAGES['text/xml'] = config['template_xml']
+    for language in SUPPORTED_LANGUAGES:
+        config_entry = "template_" + language
+        config_mime_type = SUPPORTED_LANGUAGES[language]
+
+        if config_entry not in config:
+            LOADED_TEMPLATES[config_mime_type] = None
+            continue
+
+        LOADED_TEMPLATES[config_mime_type] = config[config_entry]
 
     # Check files
     incorrect_files = []
@@ -115,19 +127,20 @@ def main():
             logger.error("File not found: {}".format(filename))
             continue
 
-        # Check file extension
+        # Retrieve mime type
         mime_type = magic.Magic(mime=True).from_file(filename)
-        if mime_type not in SUPPORTED_LANGUAGES or not SUPPORTED_LANGUAGES[mime_type]:
+        if mime_type not in LOADED_TEMPLATES or not LOADED_TEMPLATES[mime_type]:
             logger.debug("Unsupported file type({}): {}".format(mime_type, filename))
             continue
 
-        # Get template
-        template = SUPPORTED_LANGUAGES[mime_type]
+        # Get regex from template
+        template = LOADED_TEMPLATES[mime_type]
         regex = re.escape(template)
         regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
         regex = regex.replace(r"\{holder\}", r"[\w\s\.]+")
 
         error = check_header(filename, template, regex, mime_type, config["bypass_year_check"])
+
         if error:
             logger.error("{} - FAIL (reason: {})".format(filename, ERROR_MESSAGES[error]))
             incorrect_files.append(filename)

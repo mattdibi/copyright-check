@@ -50,3 +50,11 @@ template_xml: |2
 ignore:
   - ignore.java
 ```
+
+## Running tests
+
+From the root of the project run:
+
+```bash
+uv run pytest
+```

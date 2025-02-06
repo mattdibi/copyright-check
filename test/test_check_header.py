@@ -5,58 +5,29 @@ from copyright_check import Error
 
 import textwrap
 
-@pytest.mark.parametrize(
-    "filename,yearbypass,expected",
-    [
-        ('test/resources/valid.java',True, None),
-        ('test/resources/comma_separated_year.java',True, None),
-        ('test/resources/dash_separated_year.java',True, Error.HEADER_INCORRECT),
-        ('test/resources/missing.java',True, Error.HEADER_MISSING),
-        ('test/resources/incorrect.java',True, Error.HEADER_INCORRECT),
-        ('test/resources/invalidyear.java',False, Error.YEAR_INCORRECT),
-    ])
-def test_check_header_kura_param(filename, yearbypass, expected):
-    template = textwrap.dedent('''\
-        ******************************************************************************
-         * Copyright (c) {years} {holder} and/or its affiliates and others
-         *
-         * This program and the accompanying materials are made
-         * available under the terms of the Eclipse Public License 2.0
-         * which is available at https://www.eclipse.org/legal/epl-2.0/
-         *
-         * SPDX-License-Identifier: EPL-2.0
-         *
-         * Contributors:
-         *  {holder}
-    ''').strip()
+KURA_JAVA_TEMPLATE = textwrap.dedent('''\
+    ******************************************************************************
+     * Copyright (c) {years} {holder} and/or its affiliates and others
+     *
+     * This program and the accompanying materials are made
+     * available under the terms of the Eclipse Public License 2.0
+     * which is available at https://www.eclipse.org/legal/epl-2.0/
+     *
+     * SPDX-License-Identifier: EPL-2.0
+     *
+     * Contributors:
+     *  {holder}
+''').strip()
 
-    result = check_header(filename, template, "text/x-java", yearbypass)
-    assert result.error == expected, f"Expected {expected}, but got {result.error}. Diff:\n{result.diff}"
 
-@pytest.mark.parametrize(
-    "filename,yearbypass,expected",
-    [
-        ('test/resources/validesf.java',True, None),
-        ('test/resources/valid.java',True, Error.HEADER_INCORRECT),
-        ('test/resources/validesf.java',False, Error.YEAR_INCORRECT),
-    ])
-def test_check_header_esf(filename, yearbypass, expected):
-    template = textwrap.dedent('''\
-        ******************************************************************************
-         * Copyright (c) {years} Eurotech and/or its affiliates. All rights reserved.
-         ******************************************************************************
-    ''').strip()
+ESF_JAVA_TEMPLATE = textwrap.dedent('''\
+    ******************************************************************************
+     * Copyright (c) {years} Eurotech and/or its affiliates. All rights reserved.
+     ******************************************************************************
+''').strip()
 
-    result = check_header(filename, template, "text/x-java", yearbypass)
-    assert result.error == expected, f"Expected {expected}, but got {result.error}. Diff:\n{result.diff}"
 
-@pytest.mark.parametrize(
-    "filename,yearbypass,expected",
-    [
-        ('test/resources/valid.xml',True, None),
-    ])
-def test_check_header_kura_xml(filename, yearbypass, expected):
-    template = '''\
+KURA_XML_TEMPLATE = '''\
     Copyright (c) {years} {holder} and/or its affiliates and others
 
     This program and the accompanying materials are made
@@ -67,7 +38,28 @@ def test_check_header_kura_xml(filename, yearbypass, expected):
 
     Contributors:
     {holder}
-    '''.strip()
+'''.strip()
 
-    result = check_header(filename, template, "text/xml", yearbypass)
+
+@pytest.mark.parametrize(
+    "template,filename,yearbypass,expected",
+    [
+        (KURA_JAVA_TEMPLATE, 'test/resources/valid.java', True, None),
+        (KURA_JAVA_TEMPLATE, 'test/resources/comma_separated_year.java', True, None),
+        (KURA_JAVA_TEMPLATE, 'test/resources/dash_separated_year.java', True, Error.HEADER_INCORRECT),
+        (KURA_JAVA_TEMPLATE, 'test/resources/missing.java', True, Error.HEADER_MISSING),
+        (KURA_JAVA_TEMPLATE, 'test/resources/incorrect.java', True, Error.HEADER_INCORRECT),
+        (KURA_JAVA_TEMPLATE, 'test/resources/invalidyear.java', False, Error.YEAR_INCORRECT),
+
+        (ESF_JAVA_TEMPLATE, 'test/resources/validesf.java', True, None),
+        (ESF_JAVA_TEMPLATE, 'test/resources/valid.java', True, Error.HEADER_INCORRECT),
+        (ESF_JAVA_TEMPLATE, 'test/resources/validesf.java', False, Error.YEAR_INCORRECT),
+
+        (KURA_XML_TEMPLATE, 'test/resources/valid.xml', True, None),
+    ])
+def test_check_header(template, filename, yearbypass, expected):
+
+    mime_type = "text/x-java" if filename.endswith(".java") else "text/xml"
+
+    result = check_header(filename, template, mime_type, yearbypass)
     assert result.error == expected, f"Expected {expected}, but got {result.error}. Diff:\n{result.diff}"

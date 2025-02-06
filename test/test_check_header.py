@@ -37,8 +37,8 @@ KURA_XML_TEMPLATE = '''\
     SPDX-License-Identifier: EPL-2.0
 
     Contributors:
-    {holder}
-'''.strip()
+     {holder}
+'''.rstrip() # Remove trailing newline
 
 
 @pytest.mark.parametrize(

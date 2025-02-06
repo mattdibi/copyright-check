@@ -52,6 +52,8 @@ KURA_XML_TEMPLATE = '''\
         (KURA_JAVA_TEMPLATE, 'test/resources/invalidyear.java', False, Error.YEAR_INCORRECT),
 
         (ESF_JAVA_TEMPLATE, 'test/resources/validesf.java', True, None),
+        (ESF_JAVA_TEMPLATE, 'test/resources/invalidesf.java', True, Error.HEADER_INCORRECT),
+        (ESF_JAVA_TEMPLATE, 'test/resources/invalidesf2.java', True, Error.HEADER_INCORRECT),
         (ESF_JAVA_TEMPLATE, 'test/resources/valid.java', True, Error.HEADER_INCORRECT),
         (ESF_JAVA_TEMPLATE, 'test/resources/validesf.java', False, Error.YEAR_INCORRECT),
 

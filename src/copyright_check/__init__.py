@@ -95,8 +95,7 @@ def load_configuration(config_file_path):
     }
 
 
-def main():
-    # Parse command line arguments
+def build_parser():
     parser = argparse.ArgumentParser(
             prog="copyright-check",
             description='Check copyright headers',
@@ -119,7 +118,12 @@ def main():
             help='file(s) to check',
             metavar='file')
 
-    args = parser.parse_args()
+    return parser
+
+
+def main():
+    # Parse command line arguments
+    args = build_parser().parse_args()
 
     # Log some information
     logging.basicConfig(level=args.loglevel, format="[%(levelname)-5s] %(message)s")

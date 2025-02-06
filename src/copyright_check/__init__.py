@@ -32,8 +32,13 @@ ERROR_MESSAGES = {
 }
 
 
-def check_header(filename, template, regex, mime_type, bypass_year=False):
+def check_header(filename, template, mime_type, bypass_year=False):
     logger.debug("Checking file: {}".format(filename))
+
+    # Get regex from template
+    regex = re.escape(template)
+    regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
+    regex = regex.replace(r"\{holder\}", r"[\w\s\.]+")
 
     comments = comment_parser.extract_comments(filename, mime=mime_type)
     if comments is None or len(comments) == 0:
@@ -151,13 +156,7 @@ def main():
             logger.debug("Unsupported file type({}): {}".format(mime_type, filename))
             continue
 
-        # Get regex from template
-        template = config["templates"][mime_type]
-        regex = re.escape(template)
-        regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
-        regex = regex.replace(r"\{holder\}", r"[\w\s\.]+")
-
-        error = check_header(filename, template, regex, mime_type, config["bypass_year_check"])
+        error = check_header(filename, config["templates"][mime_type], mime_type, config["bypass_year_check"])
 
         if error:
             logger.error("{} - FAIL (reason: {})".format(filename, ERROR_MESSAGES[error]))

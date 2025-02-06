@@ -22,7 +22,11 @@ Example usage: copyright-check -c config.yaml $(git diff --name-only) **/*.java
 ## Example configuration
 
 ```yaml
+# Enable or disable the copyright date check
 bypass_year_check: false
+# In the template the user can specify two variables: {years} and {holder}
+# - {years} will match the copyright years (regex: `\d{4}(,\s\d{4})?`)
+# - {holder} will match the copyright holder (regex: `[\w\s\.]+`)
 template_java: |
   ******************************************************************************
    * Copyright (c) {years} {holder} and/or its affiliates and others
@@ -46,7 +50,7 @@ template_xml: |2
 
       Contributors:
        {holder}
-
+# Ignore specific files and paths. The syntax and semantics are the same as in the .gitignore file.
 ignore:
   - ignore.java
 ```

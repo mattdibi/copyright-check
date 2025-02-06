@@ -5,7 +5,17 @@ from copyright_check import Error
 
 import textwrap
 
-def test_check_header_kura():
+@pytest.mark.parametrize(
+    "filename,yearbypass,expected",
+    [
+        ('test/resources/valid.java',True, None),
+        ('test/resources/comma_separated_year.java',True, None),
+        ('test/resources/dash_separated_year.java',True, Error.HEADER_INCORRECT),
+        ('test/resources/missing.java',True, Error.HEADER_MISSING),
+        ('test/resources/incorrect.java',True, Error.HEADER_INCORRECT),
+        ('test/resources/invalidyear.java',False, Error.YEAR_INCORRECT),
+    ])
+def test_check_header_kura_param(filename, yearbypass, expected):
     template = textwrap.dedent('''\
         ******************************************************************************
          * Copyright (c) {years} {holder} and/or its affiliates and others
@@ -20,20 +30,22 @@ def test_check_header_kura():
          *  {holder}
     ''').strip()
 
-    assert check_header('test/resources/valid.java', template, "text/x-java", True) == None
-    assert check_header('test/resources/comma_separated_year.java', template, "text/x-java", True) == None
-    assert check_header('test/resources/dash_separated_year.java', template, "text/x-java", True) == Error.HEADER_INCORRECT
-    assert check_header('test/resources/missing.java', template, "text/x-java", True) == Error.HEADER_MISSING
-    assert check_header('test/resources/incorrect.java', template, "text/x-java", True) == Error.HEADER_INCORRECT
-    assert check_header('test/resources/invalidyear.java', template, "text/x-java", False) == Error.YEAR_INCORRECT
+    result = check_header(filename, template, "text/x-java", yearbypass)
+    assert result.error == expected, f"Expected {expected}, but got {result.error}. Diff:\n{result.diff}"
 
-def test_check_header_esf():
+@pytest.mark.parametrize(
+    "filename,yearbypass,expected",
+    [
+        ('test/resources/validesf.java',True, None),
+        ('test/resources/valid.java',True, Error.HEADER_INCORRECT),
+        ('test/resources/validesf.java',False, Error.YEAR_INCORRECT),
+    ])
+def test_check_header_esf(filename, yearbypass, expected):
     template = textwrap.dedent('''\
         ******************************************************************************
          * Copyright (c) {years} Eurotech and/or its affiliates. All rights reserved.
          ******************************************************************************
     ''').strip()
 
-    assert check_header('test/resources/validesf.java', template, "text/x-java", True) == None
-    assert check_header('test/resources/valid.java', template, "text/x-java", True) == Error.HEADER_INCORRECT
-    assert check_header('test/resources/validesf.java', template, "text/x-java", False) == Error.YEAR_INCORRECT
+    result = check_header(filename, template, "text/x-java", yearbypass)
+    assert result.error == expected, f"Expected {expected}, but got {result.error}. Diff:\n{result.diff}"

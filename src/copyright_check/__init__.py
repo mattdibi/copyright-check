@@ -32,6 +32,18 @@ ERROR_MESSAGES = {
 }
 
 
+class CheckResult:
+    def __init__(self, error, diff):
+        self.error = error
+        self.diff = "".join(diff) if diff else None
+
+    def is_valid(self):
+        return self.error is None
+
+    def __str__(self):
+        return "FAIL - (reson: {})".format(ERROR_MESSAGES[self.error]) if self.error else "OK"
+
+
 def check_header(filename, template, mime_type, bypass_year=False):
     logger.debug("Checking file: {}".format(filename))
 
@@ -42,7 +54,7 @@ def check_header(filename, template, mime_type, bypass_year=False):
 
     comments = comment_parser.extract_comments(filename, mime=mime_type)
     if comments is None or len(comments) == 0:
-        return Error.HEADER_MISSING
+        return CheckResult(Error.HEADER_MISSING, None)
     header_comment = comments[0] # First comment is the header
 
     # Check copyright
@@ -51,16 +63,15 @@ def check_header(filename, template, mime_type, bypass_year=False):
         template_lines = template.splitlines(True)
         diff_header_comment_lines = header_comment.text().splitlines(True)[:len(template_lines)]
         diff = ndiff(template_lines, diff_header_comment_lines)
-        logger.debug("Issues for \"{}\":\n{}\n".format(filename, "".join(diff)))
 
-        return Error.HEADER_INCORRECT
+        return CheckResult(Error.HEADER_INCORRECT, diff)
 
     # Check year
     year = datetime.datetime.now().year
     if not bypass_year and not str(year) in header_comment.text():
-        return Error.YEAR_INCORRECT
+        return CheckResult(Error.YEAR_INCORRECT, None)
 
-    return None
+    return CheckResult(None, None)
 
 
 def load_configuration(config_file_path):
@@ -156,14 +167,15 @@ def main():
             logger.debug("Unsupported file type({}): {}".format(mime_type, filename))
             continue
 
-        error = check_header(filename, config["templates"][mime_type], mime_type, config["bypass_year_check"])
+        result = check_header(filename, config["templates"][mime_type], mime_type, config["bypass_year_check"])
 
-        if error:
-            logger.error("{} - FAIL (reason: {})".format(filename, ERROR_MESSAGES[error]))
+        if not result.is_valid():
             incorrect_files.append(filename)
-            continue
 
-        logger.info("{} - OK".format(filename))
+        if result.diff:
+            logger.debug("Issues for \"{}\":\n{}\n".format(filename, result.diff))
+
+        logger.info("{} - {}".format(filename, result))
 
     if incorrect_files:
         logger.error("Incorrect files: {}".format(incorrect_files))

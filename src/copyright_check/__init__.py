@@ -57,18 +57,21 @@ def check_header(filename, template, mime_type, bypass_year=False):
         return CheckResult(Error.HEADER_MISSING, None)
     header_comment = comments[0] # First comment is the header
 
+    # Remove leading and trailing newlines
+    header_comment = header_comment.text().lstrip("\n").rstrip("\n")
+
     # Check copyright
-    if not re.search(re.compile(regex), header_comment.text()):
+    if not re.match(regex, header_comment):
         # Print diff for debugging
         template_lines = template.splitlines(True)
-        diff_header_comment_lines = header_comment.text().splitlines(True)[:len(template_lines)]
+        diff_header_comment_lines = header_comment.splitlines(True)[:len(template_lines)]
         diff = ndiff(template_lines, diff_header_comment_lines)
 
         return CheckResult(Error.HEADER_INCORRECT, "".join(diff))
 
     # Check year
     year = datetime.datetime.now().year
-    if not bypass_year and not str(year) in header_comment.text():
+    if not bypass_year and not str(year) in header_comment:
         return CheckResult(Error.YEAR_INCORRECT, None)
 
     return CheckResult(None, None)
@@ -102,7 +105,7 @@ def load_configuration(config_file_path):
             loaded_templates[config_mime_type] = None
             continue
 
-        loaded_templates[config_mime_type] = config[config_entry].strip()
+        loaded_templates[config_mime_type] = config[config_entry].rstrip()
 
     return {
         'bypass_year_check': config['bypass_year_check'],

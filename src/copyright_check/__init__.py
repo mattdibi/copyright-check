@@ -48,10 +48,10 @@ def check_header(filename, template, mime_type, bypass_year=False):
     # Check copyright
     if not re.search(re.compile(regex), header_comment.text()):
         # Print diff for debugging
-        template_lines = template.splitlines()
-        diff_header_comment_lines = header_comment.text().splitlines()[:len(template_lines)]
-        diff = ndiff(template.splitlines(), diff_header_comment_lines)
-        logger.debug("Issues for \"{}\":\n{}".format(filename, "\n".join(diff)))
+        template_lines = template.splitlines(True)
+        diff_header_comment_lines = header_comment.text().splitlines(True)[:len(template_lines)]
+        diff = ndiff(template_lines, diff_header_comment_lines)
+        logger.debug("Issues for \"{}\":\n{}\n".format(filename, "".join(diff)))
 
         return Error.HEADER_INCORRECT
 

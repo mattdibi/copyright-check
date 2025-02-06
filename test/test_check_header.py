@@ -3,28 +3,26 @@ import pytest
 from copyright_check import check_header
 from copyright_check import Error
 
-import textwrap
-
-KURA_JAVA_TEMPLATE = textwrap.dedent('''\
-    ******************************************************************************
-     * Copyright (c) {years} {holder} and/or its affiliates and others
-     *
-     * This program and the accompanying materials are made
-     * available under the terms of the Eclipse Public License 2.0
-     * which is available at https://www.eclipse.org/legal/epl-2.0/
-     *
-     * SPDX-License-Identifier: EPL-2.0
-     *
-     * Contributors:
-     *  {holder}
-''').strip()
+KURA_JAVA_TEMPLATE = '''\
+******************************************************************************
+ * Copyright (c) {years} {holder} and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  {holder}
+'''.rstrip() # Remove trailing newline
 
 
-ESF_JAVA_TEMPLATE = textwrap.dedent('''\
-    ******************************************************************************
-     * Copyright (c) {years} Eurotech and/or its affiliates. All rights reserved.
-     ******************************************************************************
-''').strip()
+ESF_JAVA_TEMPLATE = '''\
+******************************************************************************
+ * Copyright (c) {years} Eurotech and/or its affiliates. All rights reserved.
+ ******************************************************************************
+'''.rstrip()
 
 
 KURA_XML_TEMPLATE = '''\
@@ -38,7 +36,7 @@ KURA_XML_TEMPLATE = '''\
 
     Contributors:
      {holder}
-'''.rstrip() # Remove trailing newline
+'''.rstrip()
 
 
 @pytest.mark.parametrize(

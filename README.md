@@ -1,6 +1,10 @@
 # copyright-check
 Copyright checker
 
+## Requirements
+
+- [libmagic](https://pypi.org/project/python-magic/)
+
 ## Usage
 
 ```bash

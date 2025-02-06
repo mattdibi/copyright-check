@@ -49,3 +49,25 @@ def test_check_header_esf(filename, yearbypass, expected):
 
     result = check_header(filename, template, "text/x-java", yearbypass)
     assert result.error == expected, f"Expected {expected}, but got {result.error}. Diff:\n{result.diff}"
+
+@pytest.mark.parametrize(
+    "filename,yearbypass,expected",
+    [
+        ('test/resources/valid.xml',True, None),
+    ])
+def test_check_header_kura_xml(filename, yearbypass, expected):
+    template = '''\
+    Copyright (c) {years} {holder} and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+    {holder}
+    '''.strip()
+
+    result = check_header(filename, template, "text/xml", yearbypass)
+    assert result.error == expected, f"Expected {expected}, but got {result.error}. Diff:\n{result.diff}"

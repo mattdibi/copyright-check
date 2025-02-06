@@ -91,7 +91,7 @@ def load_configuration(config_file_path):
             loaded_templates[config_mime_type] = None
             continue
 
-        loaded_templates[config_mime_type] = config[config_entry]
+        loaded_templates[config_mime_type] = config[config_entry].strip()
 
     return {
         'bypass_year_check': config['bypass_year_check'],

@@ -11,6 +11,7 @@ from enum import Enum
 from difflib import ndiff
 
 from comment_parser import comment_parser
+from pathspec import PathSpec
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,7 @@ def load_configuration(config_file_path):
             logger.error("Error parsing config file: {}".format(exc))
             return None
 
+    # Load templates
     for language in SUPPORTED_LANGUAGES:
         config_entry = "template_" + language
         config_mime_type = SUPPORTED_LANGUAGES[language]
@@ -107,10 +109,13 @@ def load_configuration(config_file_path):
 
         loaded_templates[config_mime_type] = config[config_entry].rstrip()
 
+    # Load ignore files
+    ignore_paths = PathSpec.from_lines('gitwildmatch', config['ignore'])
+
     return {
         'bypass_year_check': config['bypass_year_check'],
         'templates': loaded_templates,
-        'ignore_files': config['ignore']
+        'ignore_paths': ignore_paths
     }
 
 
@@ -168,6 +173,10 @@ def main():
         mime_type = magic.Magic(mime=True).from_file(filename)
         if mime_type not in config["templates"] or not config["templates"][mime_type]:
             logger.debug("Unsupported file type({}): {}".format(mime_type, filename))
+            continue
+
+        if config["ignore_paths"].match_file(filename):
+            logger.debug("Ignoring file: {}".format(filename))
             continue
 
         result = check_header(filename, config["templates"][mime_type], mime_type, config["bypass_year_check"])

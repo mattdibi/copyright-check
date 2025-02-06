@@ -21,4 +21,6 @@ def test_check_header():
          *  {holder}
         ''')
 
-    assert check_header('test/resources/test.java', template, "text/x-java", True) == None
+    assert check_header('test/resources/valid.java', template, "text/x-java", True) == None
+    assert check_header('test/resources/missing.java', template, "text/x-java", True) == Error.HEADER_MISSING
+    assert check_header('test/resources/incorrect.java', template, "text/x-java", True) == Error.HEADER_INCORRECT

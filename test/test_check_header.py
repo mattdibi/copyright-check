@@ -56,6 +56,8 @@ KURA_XML_TEMPLATE = '''\
         (ESF_JAVA_TEMPLATE, 'test/resources/validesf.java', False, Error.YEAR_INCORRECT),
 
         (KURA_XML_TEMPLATE, 'test/resources/valid.xml', True, None),
+        (KURA_XML_TEMPLATE, 'test/resources/invalid.xml', True, Error.HEADER_INCORRECT),
+        (KURA_XML_TEMPLATE, 'test/resources/valid.xml', False, Error.YEAR_INCORRECT),
     ])
 def test_check_header(template, filename, yearbypass, expected):
 

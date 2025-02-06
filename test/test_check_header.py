@@ -24,3 +24,4 @@ def test_check_header():
     assert check_header('test/resources/valid.java', template, "text/x-java", True) == None
     assert check_header('test/resources/missing.java', template, "text/x-java", True) == Error.HEADER_MISSING
     assert check_header('test/resources/incorrect.java', template, "text/x-java", True) == Error.HEADER_INCORRECT
+    assert check_header('test/resources/invalidyear.java', template, "text/x-java", False) == Error.YEAR_INCORRECT

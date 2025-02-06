@@ -35,7 +35,7 @@ ERROR_MESSAGES = {
 class CheckResult:
     def __init__(self, error, diff):
         self.error = error
-        self.diff = "".join(diff) if diff else None
+        self.diff = diff
 
     def is_valid(self):
         return self.error is None
@@ -64,7 +64,7 @@ def check_header(filename, template, mime_type, bypass_year=False):
         diff_header_comment_lines = header_comment.text().splitlines(True)[:len(template_lines)]
         diff = ndiff(template_lines, diff_header_comment_lines)
 
-        return CheckResult(Error.HEADER_INCORRECT, diff)
+        return CheckResult(Error.HEADER_INCORRECT, "".join(diff))
 
     # Check year
     year = datetime.datetime.now().year

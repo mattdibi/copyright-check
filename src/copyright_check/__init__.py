@@ -64,11 +64,11 @@ def check_header(filename, template, mime_type, bypass_year=False):
     # Check copyright
     if not re.match(regex, header_comment):
         # Print diff for debugging
-        template_lines = template.splitlines(keepends=True)
-        diff_header_comment_lines = header_comment.splitlines(keepends=True)[:len(template_lines)]
+        template_lines = template.splitlines()
+        diff_header_comment_lines = header_comment.splitlines()[:len(template_lines)]
         diff = ndiff(template_lines, diff_header_comment_lines)
 
-        return CheckResult(Error.HEADER_INCORRECT, "".join(diff))
+        return CheckResult(Error.HEADER_INCORRECT, os.linesep.join(diff))
 
     # Check year
     year = datetime.datetime.now().year
@@ -107,7 +107,7 @@ def load_configuration(config_file_path):
             loaded_templates[config_mime_type] = None
             continue
 
-        loaded_templates[config_mime_type] = config[config_entry].rstrip()
+        loaded_templates[config_mime_type] = config[config_entry]
 
     # Load ignore files
     ignore_paths = PathSpec.from_lines('gitwildmatch', config['ignore'])
@@ -185,7 +185,7 @@ def main():
             incorrect_files.append(filename)
 
         if result.diff:
-            logger.debug("Issues for \"{}\":\n{}\n".format(filename, result.diff))
+            logger.debug("Issues for \"{}\":\n{}".format(filename, result.diff))
 
         logger.info("{} - {}".format(filename, result))
 

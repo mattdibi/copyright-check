@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2024 Eurotech and/or its affiliates. All rights reserved.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>kura</artifactId>
+		<version>6.0.0-SNAPSHOT</version>
+	</parent>
+
+    <!--
+        this is
+        another multiline
+        test
+    -->
+
+    <artifactId>org.eclipse.kura.asset.provider</artifactId>
+    <version>3.0.0-SNAPSHOT</version>
+    <packaging>eclipse-plugin</packaging>
+
+    <!-- this is only a test -->
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.asset.provider.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
+
+</project>

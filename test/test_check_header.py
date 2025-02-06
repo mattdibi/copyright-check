@@ -39,6 +39,11 @@ KURA_XML_TEMPLATE = '''\
 '''.rstrip()
 
 
+ESF_XML_TEMPLATE = '''\
+    Copyright (c) {years} Eurotech and/or its affiliates. All rights reserved.
+'''.rstrip()
+
+
 @pytest.mark.parametrize(
     "template,filename,yearbypass,expected",
     [
@@ -57,7 +62,12 @@ KURA_XML_TEMPLATE = '''\
 
         (KURA_XML_TEMPLATE, 'test/resources/valid.xml', True, None),
         (KURA_XML_TEMPLATE, 'test/resources/invalid.xml', True, Error.HEADER_INCORRECT),
+        (KURA_XML_TEMPLATE, 'test/resources/validesf.xml', True, Error.HEADER_INCORRECT),
         (KURA_XML_TEMPLATE, 'test/resources/valid.xml', False, Error.YEAR_INCORRECT),
+
+        (ESF_XML_TEMPLATE, 'test/resources/validesf.xml', True, None),
+        (ESF_XML_TEMPLATE, 'test/resources/valid.xml', True, Error.HEADER_INCORRECT),
+        (ESF_XML_TEMPLATE, 'test/resources/validesf.xml', False, Error.YEAR_INCORRECT),
     ])
 def test_check_header(template, filename, yearbypass, expected):
 

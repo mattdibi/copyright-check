@@ -62,4 +62,4 @@ def test_check_header(template, filename, yearbypass, expected):
     mime_type = "text/x-java" if filename.endswith(".java") else "text/xml"
 
     result = check_header(filename, template, mime_type, yearbypass)
-    assert result.error == expected, f"Expected {expected}, but got {result.error}. Diff:\n{result.diff}"
+    assert result.error == expected, f"Expected {expected}, but got {result.error} for \"{filename}\". Diff:\n{result.diff}"

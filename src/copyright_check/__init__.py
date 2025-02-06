@@ -42,7 +42,7 @@ class CheckResult:
         return self.error is None
 
     def __str__(self):
-        return "FAIL - (reson: {})".format(ERROR_MESSAGES[self.error]) if self.error else "OK"
+        return "FAIL (reson: {})".format(ERROR_MESSAGES[self.error]) if self.error else "OK"
 
 
 def check_header(filename, template, mime_type, bypass_year=False):

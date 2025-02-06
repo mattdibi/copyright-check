@@ -20,12 +20,6 @@ SUPPORTED_LANGUAGES = {
     'c': 'text/x-c'
 }
 
-LOADED_TEMPLATES = {
-    'text/x-java': None,
-    'text/xml': None,
-    'text/x-c': None
-}
-
 class Error(Enum):
     HEADER_MISSING = 1
     HEADER_INCORRECT = 2
@@ -64,6 +58,43 @@ def check_header(filename, template, regex, mime_type, bypass_year=False):
     return None
 
 
+def load_configuration(config_file_path):
+    loaded_templates = {
+        'text/x-java': None,
+        'text/xml': None,
+        'text/x-c': None
+    }
+
+    # Parse config
+    if not os.path.isfile(config_file_path):
+        logger.error("Config file not found: {}".format(config_file_path))
+        return None
+
+    config = None
+    with open(config_file_path, 'r') as stream:
+        try:
+            config = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            logger.error("Error parsing config file: {}".format(exc))
+            return None
+
+    for language in SUPPORTED_LANGUAGES:
+        config_entry = "template_" + language
+        config_mime_type = SUPPORTED_LANGUAGES[language]
+
+        if config_entry not in config:
+            loaded_templates[config_mime_type] = None
+            continue
+
+        loaded_templates[config_mime_type] = config[config_entry]
+
+    return {
+        'bypass_year_check': config['bypass_year_check'],
+        'templates': loaded_templates,
+        'ignore_files': config['ignore']
+    }
+
+
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(
@@ -97,27 +128,10 @@ def main():
     logger.info("Current working directory: {}".format(os.getcwd()))
 
     # Parse config
-    if not os.path.isfile(args.config):
-        logger.error("Config file not found: {}".format(args.config))
+    config = load_configuration(args.config)
+    if config is None:
+        logger.error("Error loading configuration at path: {}".format(args.config))
         exit(1)
-
-    config = None
-    with open(args.config, 'r') as stream:
-        try:
-            config = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            logger.error("Error parsing config file: {}".format(exc))
-            exit(1)
-
-    for language in SUPPORTED_LANGUAGES:
-        config_entry = "template_" + language
-        config_mime_type = SUPPORTED_LANGUAGES[language]
-
-        if config_entry not in config:
-            LOADED_TEMPLATES[config_mime_type] = None
-            continue
-
-        LOADED_TEMPLATES[config_mime_type] = config[config_entry]
 
     # Check files
     incorrect_files = []
@@ -129,12 +143,12 @@ def main():
 
         # Retrieve mime type
         mime_type = magic.Magic(mime=True).from_file(filename)
-        if mime_type not in LOADED_TEMPLATES or not LOADED_TEMPLATES[mime_type]:
+        if mime_type not in config["templates"] or not config["templates"][mime_type]:
             logger.debug("Unsupported file type({}): {}".format(mime_type, filename))
             continue
 
         # Get regex from template
-        template = LOADED_TEMPLATES[mime_type]
+        template = config["templates"][mime_type]
         regex = re.escape(template)
         regex = regex.replace(r"\{years\}", r"(\d{4}|\d{4}, \d{4})")
         regex = regex.replace(r"\{holder\}", r"[\w\s\.]+")

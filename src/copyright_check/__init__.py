@@ -162,6 +162,7 @@ def main():
         exit(1)
 
     # Check files
+    analyzed_files = []
     incorrect_files = []
 
     for filename in args.filenames:
@@ -187,10 +188,12 @@ def main():
         if result.diff:
             logger.debug("Issues for \"{}\":\n{}".format(filename, result.diff))
 
+        analyzed_files.append(filename)
         logger.info("{} - {}".format(filename, result))
 
+    logger.info("Found {}/{} invalid files".format(len(incorrect_files), len(analyzed_files)))
+
     if incorrect_files:
-        logger.error("Incorrect files: {}".format(incorrect_files))
         exit(1)
 
 if __name__ == '__main__':

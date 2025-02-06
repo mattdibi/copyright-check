@@ -63,8 +63,8 @@ def check_header(filename, template, mime_type, bypass_year=False):
     # Check copyright
     if not re.match(regex, header_comment):
         # Print diff for debugging
-        template_lines = template.splitlines(True)
-        diff_header_comment_lines = header_comment.splitlines(True)[:len(template_lines)]
+        template_lines = template.splitlines(keepends=True)
+        diff_header_comment_lines = header_comment.splitlines(keepends=True)[:len(template_lines)]
         diff = ndiff(template_lines, diff_header_comment_lines)
 
         return CheckResult(Error.HEADER_INCORRECT, "".join(diff))

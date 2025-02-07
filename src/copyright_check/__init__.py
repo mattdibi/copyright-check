@@ -71,9 +71,10 @@ def check_header(filename, template, mime_type, bypass_year=False):
         return CheckResult(Error.HEADER_INCORRECT, os.linesep.join(diff))
 
     # Check year
-    year = datetime.datetime.now().year
-    if not bypass_year and not str(year) in header_comment:
-        return CheckResult(Error.YEAR_INCORRECT, None)
+    expected_year = datetime.datetime.now().year
+    found_year = int(re.search(r"(\d{4})[^,]", header_comment).group(1)) # Expects "," as year separator
+    if not bypass_year and found_year != expected_year:
+        return CheckResult(Error.YEAR_INCORRECT, "Found \"{}\" expected \"{}\"".format(found_year, expected_year))
 
     return CheckResult(None, None)
 

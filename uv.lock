@@ -21,7 +21,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/37/6a/354d8e640b5f90996
 
 [[package]]
 name = "copyright-check"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "comment-parser" },

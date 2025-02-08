@@ -168,7 +168,7 @@ def main():
 
     for filename in args.filenames:
         if not os.path.isfile(filename):
-            logger.error("File not found: {}".format(filename))
+            logger.info("File not found: {}".format(filename))
             continue
 
         # Retrieve mime type

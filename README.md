@@ -1,6 +1,9 @@
 # copyright-check
 Copyright checker
 
+> [!WARNING]
+> Development moved to [https://github.com/eclipse-kura/copyright-check](https://github.com/eclipse-kura/copyright-check)
+
 ## Requirements
 
 - [libmagic](https://pypi.org/project/python-magic/)
